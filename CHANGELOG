@@ -1,3 +1,5 @@
 Remedy Generic Find (2012-05-29)
  * Initial version.  See README for details.
 
+V2
+ *Added instance ID list to returned values.

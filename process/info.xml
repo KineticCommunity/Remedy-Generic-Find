@@ -15,7 +15,7 @@ with a default value of 'KD_WEBUSER' add the following line:
 <taskInfo version="1.0">
   <info name="server" description="Remedy Server Name or IP Address"></info>
   <info name="username" description="Remedy Login Name"></info>
-  <info name="password" description="Remedy Password"></info>
+  <info name="password" type="encrypted" description="Remedy Password"></info>
   <info name="port" description="Remedy TCP Port">0</info>
   <info name="prognum" description="Remedy RPC Prognum">0</info>
   <info name="authentication" description="Remedy Authentication String"></info>

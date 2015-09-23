@@ -9,7 +9,7 @@
     'enable_debug_logging' => 'Yes'
   },
   'parameters' => {
-	'form' => 'User',
-    'query' => '\'Default Notify Mechanism\' = "None"'
+	'form' => 'KS_TSK_Tree',
+    'query' => '\'7\' = "Active"'
   }
 }

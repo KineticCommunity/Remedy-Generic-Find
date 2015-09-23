@@ -1,0 +1,30 @@
+== Remedy Generic Find
+Returns the request ids (field 1) for all records in the specified
+form that match the provided query.
+
+For more information, see the Detailed Description section below.
+
+=== Parameters
+[Remedy Form]
+	Remedy Form Name (not display name), eg. People is CTM:People
+[Query]
+	The query to search by
+
+=== Sample Configuration
+Remedy Form::       User
+Query::		'Group List' LIKE "%<%=@answers['Group']%>%"
+
+=== Results
+[List]
+  The request ids (field 1) of the updated record.
+
+=== Detailed Description
+This handler returns the request ids (field 1) for all records in 
+the specified form that match the provided query.  This is returned
+in XML format (like below) for use in loops.
+
+<Request_Ids>
+	<RequestId>000000000000013</RequestId>
+	<RequestId>000000000000381</RequestId>
+	<RequestId>000000000002582</RequestId>
+</Request_Ids>

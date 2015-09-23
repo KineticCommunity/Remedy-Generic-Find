@@ -4,7 +4,7 @@ require 'rexml/document'
 # of the common Remedy operations.
 require 'ars_models'
 
-class RemedyGenericFindV1
+class RemedyGenericFindV3
   # Prepare for execution by pre-loading Ars form definitions, building Hash
   # objects for necessary values, and validating the present state.  This method
   # sets the following instance variables:
@@ -37,12 +37,14 @@ class RemedyGenericFindV1
 		
     # Initialize the handler and pre-load form definitions using the credentials
     # supplied by the task info items.
-    preinitialize_on_first_load(@input_document, [@parameters['form']])
+	# Here we initialize with an empty forms array because this handler will be
+	# used to access a dynamic set of forms depending on the input.  See the
+	# get_remedy_form function below for details about how the forms are cached.
+    preinitialize_on_first_load(@input_document, [])
   end
   
-  # Uses the Remedy Login ID to retrieve a single entry from the ITSM v7.x
-  # CTM:People form.  The purpose of this is to return data elements associated
-  # to the entry found.
+  # Returns the request ids (field 1) and instance ids (field 179) for all records 
+  # in the specified form that match the provided prameter of query.
   #
   # This is a required method that is automatically called by the Kinetic Task
   # Engine.
@@ -52,10 +54,10 @@ class RemedyGenericFindV1
   def execute()
   
     # Retrieve a entries from specified form with given query
-    entry = @@remedy_forms[@parameters['form']].find_entries(
+    entry = get_remedy_form(@parameters['form']).find_entries(
       :all,
       :conditions => [%|#{@parameters['query']}|],
-      :fields => [1]
+      :fields => [1,179]
     )
 	
 	# Raise error if unable to locate the entry
@@ -63,22 +65,29 @@ class RemedyGenericFindV1
 	
 	#Begin building XML of fields
 	id_list = '<Request_Ids>'
+	id_list2 = '<Instance_Ids>'
 	
     # Build up a list of all request ids returned
 	entry.each do |entry|
 		if (entry[1])
 			id_list << '<RequestId>'+ entry[1] +'</RequestId>'
 		end
+		if (entry[179])
+			id_list2 << '<InstanceId>'+ entry[179] +'</InstanceId>'
+		end
 	end
 	
 	#Complete result XML
 	id_list << '</Request_Ids>'
+	id_list2 << '</Instance_Ids>'
+
 	
 	
     # Build the results to be returned by this handler
     results = <<-RESULTS
     <results>
-      <result name="List">#{escape(id_list)}</result>
+      <result name="RequestIdList">#{escape(id_list)}</result>
+	<result name="InstanceIdList">#{escape(id_list2)}</result>
     </results>
     RESULTS
 	puts(results) if @debug_logging_enabled	
@@ -87,6 +96,20 @@ class RemedyGenericFindV1
     return results
   end
 
+    
+  # This method is an accessor for the @@remedy_forms variable that caches form
+  # definitions.  It checks to see if the specified form has been loaded if so
+  # it returns it otherwise it needs to load the form and add it to the cache.
+  def get_remedy_form(form_name)
+	if @@remedy_forms[form_name].nil?
+		@@remedy_forms[form_name] = ArsModels::Form.find(form_name, :context => @@remedy_context)
+	end
+	if @@remedy_forms[form_name].nil?
+		raise "Could not find form " + form_name
+	end
+	@@remedy_forms[form_name]
+  end
+  
   ##############################################################################
   # General handler utility functions
   ##############################################################################

@@ -1,3 +1,4 @@
 <results>
-      <result name="List">.+</result>
+    <result name="RequestIdList" type="Regexp">.+</result>
+	<result name="InstanceIdList" type="Regexp">.+</result>
 </results>

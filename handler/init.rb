@@ -4,7 +4,7 @@ require 'rexml/document'
 # of the common Remedy operations.
 require 'ars_models'
 
-class RemedyGenericFindV2
+class RemedyGenericFindV1
   # Prepare for execution by pre-loading Ars form definitions, building Hash
   # objects for necessary values, and validating the present state.  This method
   # sets the following instance variables:
@@ -55,7 +55,7 @@ class RemedyGenericFindV2
     entry = @@remedy_forms[@parameters['form']].find_entries(
       :all,
       :conditions => [%|#{@parameters['query']}|],
-      :fields => [1,179]
+      :fields => [1]
     )
 	
 	# Raise error if unable to locate the entry
@@ -63,29 +63,22 @@ class RemedyGenericFindV2
 	
 	#Begin building XML of fields
 	id_list = '<Request_Ids>'
-	id_list2 = '<Instance_Ids>'
 	
     # Build up a list of all request ids returned
 	entry.each do |entry|
 		if (entry[1])
 			id_list << '<RequestId>'+ entry[1] +'</RequestId>'
 		end
-		if (entry[179])
-			id_list2 << '<InstanceId>'+ entry[179] +'</InstanceId>'
-		end
 	end
 	
 	#Complete result XML
 	id_list << '</Request_Ids>'
-	id_list2 << '</Instance_Ids>'
-
 	
 	
     # Build the results to be returned by this handler
     results = <<-RESULTS
     <results>
-      <result name="RequestIdList">#{escape(id_list)}</result>
-	<result name="InstanceIdList">#{escape(id_list2)}</result>
+      <result name="List">#{escape(id_list)}</result>
     </results>
     RESULTS
 	puts(results) if @debug_logging_enabled	
